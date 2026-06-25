@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tata Usaha — Politeknik Perkeretaapian Indonesia</title>
+<meta name="description" content="Sistem Tata Usaha sederhana untuk Politeknik Perkeretaapian Indonesia — single-file untuk GitHub Pages." />
+<style>
+:root{
+--bg:#0f1724; --card:#0b1220; --muted:#93a3b8; --accent:#0ea5a4; --glass:rgba(255,255,255,0.06);
+--radius:12px; --maxw:980px; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+} *{box-sizing:border-box} body{margin:0; background:linear-gradient(180deg,#071025 0%, #071a2a 60%); color:#e6eef6; -webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--maxw);margin:28px auto;padding:20px}
+header{display:flex;align-items:center;gap:16px}
+.logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#083248,#05636a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px}
+h1{margin:0;font-size:20px}
+p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:16px;margin-top:18px}
+@media(max-width:880px){.grid{grid-template-columns:1fr} .right{order:2}}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+.small{font-size:13px;color:var(--muted)}
+.stats{display:flex;gap:12px;flex-wrap:wrap}
+.stat{flex:1;min-width:140px;padding:12px;background:var(--glass);border-radius:10px}
+.stat strong{display:block;font-size:18px}
+.btn{background:var(--accent);color:#042324;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+form .row{display:grid;grid-template-columns:1fr 120px;gap:10px}
+@media(max-width:480px){form .row{grid-template-columns:1fr}}
+label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+textarea{min-height:100px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+th,td{padding:8px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.03)}
+.muted{color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.link{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+.note{background:linear-gradient(90deg, rgba(14,165,164,0.08), rgba(14,165,164,0.03));padding:10px;border-radius:8px;border:1px solid rgba(14,165,164,0.06);color:var(--muted);font-size:13px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="logo">PPI</div>
+<div>
+<h1>Tata Usaha — Politeknik Perkeretaapian Indonesia</h1>
+<p class="lead">Sistem tata usaha sederhana — surat, arsip, pengajuan. Single-file untuk GitHub Pages.</p>
+</div>
+</header>
+
+<div class="grid">
+<main>
+<section class="card" id="dashboard">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><strong>Dashboard</strong><div class="small">Ringkasan cepat</div></div>
+<div class="small muted" id="timeNow"></div>
+</div>
+<div style="margin-top:12px" class="stats">
+<div class="stat">
+<div class="small">Surat Masuk</div>
+<strong id="cntIn">0</strong>
+<div class="small muted">Surat diterima</div>
+</div>
+<div class="stat">
+<div class="small">Surat Keluar</div>
+<strong id="cntOut">0</strong>
+<div class="small muted">Surat dikirim</div>
+</div>
+<div class="stat">
+<div class="small">Arsip</div>
+<strong id="cntArchive">0</strong>
+<div class="small muted">Dokumen tersimpan (lokal)</div>
+</div>
+</div>
+</section>
+
+<section class="card" style="margin-top:14px">
+<strong>Form Pengajuan / Permohonan</strong>
+<p class="small muted">Isi form ini untuk mengirim pengajuan ke Tata Usaha. (Formspree digunakan untuk menerima email di alamat TU. Ganti endpoint dengan milikmu.)</p>
+
+<!-- Ganti action ke endpoint Formspree milikmu: https://formspree.io/f/XXXXX -->
+<form id="pengajuanForm" action="https://formspree.io/f/your-form-id" method="POST" enctype="multipart/form-data" onsubmit="handleSubmit(event)">
+<label for="nama">Nama Pemohon</label>
+<input id="nama" name="nama" required />
+
+<label for="unit">Unit / Jurusan</label>
+<input id="unit" name="unit" required />
+
+<label for="jenis">Jenis Pengajuan</label>
+<select id="jenis" name="jenis" required>
+<option value="">Pilih...</option>
+<option>Surat Keterangan</option>
+<option>Permohonan Cuti</option>
+<option>Permintaan Arsip</option>
+<option>Lainnya</option>
+</select>
+
+<label for="keterangan">Keterangan</label>
+<textarea id="keterangan" name="keterangan" placeholder="Jelaskan permohonan..."></textarea>
+
+<label for="bukti">Upload Bukti (opsional)</label>
+<input id="bukti" name="bukti" type="file" />
+
+<div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+<button class="btn" type="submit">Kirim Pengajuan</button>
+<div class="small muted">Atau simpan lokal untuk uji coba</div>
+</div>
+</form>
+
+<div id="formMsg" class="note hidden" style="margin-top:12px"></div>
+</section>
+
+<section class="card" style="margin-top:14px">
+<strong>Daftar Surat (Dummy / Editable)</strong>
+<p class="small muted">Contoh data surat masuk/keluar. Kamu dapat edit data di file ini atau menambahkan UI untuk edit.</p>
+<table id="tableSurat">
+<thead><tr><th>No</th><th>Tanggal</th><th>Jenis</th><th>Perihal</th><th>Aksi</th></tr></thead>
+<tbody></tbody>
+</table>
+<div class="actions" style="margin-top:8px">
+<button class="link" onclick="addDummy()">Tambah Dummy</button>
+<button class="link" onclick="clearSurat()">Kosongkan</button>
+<button class="link" onclick="downloadData()">Download JSON</button>
+</div>
+</section>
+
+<section class="card" style="margin-top:14px">
+<strong>Arsip Dokumen (Simulasi)</strong>
+<p class="small muted">Upload file di sini hanya untuk simulasi tampilan; file tidak disimpan di GitHub Pages. Gunakan backend atau storage (Google Drive / S3) bila ingin menyimpan persistently.</p>
+<input id="archFile" type="file" />
+<div id="archList" style="margin-top:10px"></div>
+</section>
+</main>
+
+<aside class="right card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<strong>Kontak TU</strong>
+<div class="small muted">Politeknik Perkeretaapian Indonesia</div>
+</div>
+</div>
+
+<div style="margin-top:12px">
+<div class="small">Alamat</div>
+<div class="muted">Jalan Tirta Raya, Kota Madiun, Jawa Timur</div>
+</div>
+
+<div style="margin-top:10px">
+<div class="small">Telp / Email</div>
+<div class="muted">(0351) 474777 — kontak@ppi.ac.id</div>
+</div>
+
+<div style="margin-top:12px">
+<strong class="small">Cepat Akses</strong>
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+<button class="link" onclick="goTo('persetujuan')">Halaman Persetujuan</button>
+<button class="link" onclick="goTo('about')">Tentang / Info</button>
+<a class="link" href="https://ppi.ac.id" target="_blank" rel="noopener">Website PPI</a>
+</div>
+</div>
+
+<div style="margin-top:12px">
+<div class="small">Petunjuk Formspree</div>
+<div class="muted small">Buat akun Formspree, buat form baru, dan ganti action form di atas dengan endpoint milikmu agar pengajuan dikirim ke email TU. [Formspree/Cloudflare docs]</div>
+</div>
+
+</aside>
+</div>
+
+<footer>
+&copy; <span id="year"></span> Politeknik Perkeretaapian Indonesia — Tata Usaha (single-file). Dibuat untuk GitHub Pages.
+</footer>
+</div>
+
+<!-- Persetujuan Orang Tua (section modal-like) -->
+<div id="persetujuanModal" class="hidden" style="position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;padding:20px">
+<div style="max-width:680px;width:100%" class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<strong>Persetujuan Orang Tua / Wali</strong>
+<button class="link" onclick="closePersetujuan()">Tutup</button>
+</div>
+<p class="small muted" style="margin-top:6px">Form persetujuan ini bisa dipakai untuk izin studi/kunjungan praktik. Centang untuk menyetujui, lalu submit.</p>
+<form id="formPersetujuan" onsubmit="handlePersetujuan(event)" style="margin-top:8px">
+<label for="namaAnak">Nama Taruna</label><input id="namaAnak" required />
+<label style="margin-top:8px"><input type="checkbox" id="chkSetuju" required /> Saya orang tua/wali menyetujui</label>
+<div style="margin-top:10px;display:flex;gap:8px"><button class="btn" type="submit">Kirim Persetujuan</button><button class="link" type="button" onclick="closePersetujuan()">Batal</button></div>
+</form>
+<div id="msgPersetujuan" class="note hidden" style="margin-top:10px"></div>
+</div>
+</div>
+
+<script>
+// Data storage using localStorage to simulate persistence on static hosting
+const LS_SURAT = 'tu_surat_list_v1';
+const LS_ARCH = 'tu_arch_list_v1';
+
+function nowText(){return new Date().toLocaleString('id-ID')}
+document.getElementById('timeNow').textContent = nowText();
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// Load lists
+function loadSurat(){
+const raw = localStorage.getItem(LS_SURAT);
+return raw ? JSON.parse(raw) : [];
+} function saveSurat(list){ localStorage.setItem(LS_SURAT, JSON.stringify(list)); renderSurat(); }
+
+function renderSurat(){
+const tbody = document.querySelector('#tableSurat tbody');
+const list = loadSurat();
+tbody.innerHTML = '';
+list.forEach((s,i)=>{
+const tr = document.createElement('tr');
+tr.innerHTML = `<td>${i+1}</td><td>${s.tgl}</td><td>${s.jenis}</td><td>${escapeHtml(s.perihal)}</td>
+<td><button class="link" onclick="downloadSurat(${i})">Unduh</button> <button class="link" onclick="hapusSurat(${i})">Hapus</button></td>`;
+tbody.appendChild(tr);
+});
+document.getElementById('cntIn').textContent = list.filter(s=>s.tipe==='masuk').length || 0;
+document.getElementById('cntOut').textContent = list.filter(s=>s.tipe==='keluar').length || 0;
+document.getElementById('cntArchive').textContent = JSON.parse(localStorage.getItem(LS_ARCH)||'[]').length || 0;
+}
+
+function addDummy(){
+const list = loadSurat();
+list.push({tgl:new Date().toLocaleDateString('id-ID'), jenis:'Surat Masuk', perihal:'Surat edaran kegiatan', tipe:'masuk', file:null});
+saveSurat(list);
+} function clearSurat(){ if(confirm('Kosongkan seluruh daftar surat?')){ localStorage.removeItem(LS_SURAT); renderSurat(); } }
+function hapusSurat(i){ const list=loadSurat(); list.splice(i,1); saveSurat(list); }
+function downloadData(){
+const data = localStorage.getItem(LS_SURAT) || '[]';
+const blob = new Blob([data],{type:'application/json'}); downloadBlob(blob,'surat-data.json');
+} function downloadSurat(i){
+const list=loadSurat(); const s=list[i]; const blob=new Blob([JSON.stringify(s)],{type:'application/json'}); downloadBlob(blob,surat-${i+1}.json);
+} function downloadBlob(blob, name){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
+
+function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+
+// Form submit handler (saves locally + lets Formspree send)
+function handleSubmit(ev){
+// keep default submit to Formspree, but also save a local copy for UI
+const form = ev.target;
+const fd = new FormData(form);
+const obj = {
+tgl: new Date().toLocaleString('id-ID'),
+nama: fd.get('nama'),
+unit: fd.get('unit'),
+jenis: fd.get('jenis'),
+keterangan: fd.get('keterangan'),
+fileName: fd.get('bukti') && fd.get('bukti').name ? fd.get('bukti').name : null,
+tipe: 'masuk'
+};
+// store locally
+const list = loadSurat();
+list.unshift(obj);
+saveSurat(list);
+// show msg; actual network submit continues (for static hosting Formspree handles it)
+const msg = document.getElementById('formMsg');
+msg.classList.remove('hidden'); msg.textContent = 'Pengajuan tersimpan lokal dan dikirim (jika Formspree diatur). Terima kasih.';
+setTimeout(()=>msg.classList.add('hidden'),5000);
+// allow normal submit to continue (no preventDefault)
+}
+
+// Persetujuan modal
+function goTo(page){
+if(page==='persetujuan'){ document.getElementById('persetujuanModal').classList.remove('hidden'); }
+if(page==='about'){ alert('Politeknik Perkeretaapian Indonesia — kunjungi Website Resmi untuk info lengkap.'); }
+} function closePersetujuan(){ document.getElementById('persetujuanModal').classList.add('hidden'); }
+function handlePersetujuan(ev){
+ev.preventDefault();
+const name = document.getElementById('namaAnak').value;
+const chk = document.getElementById('chkSetuju').checked;
+if(!chk){ alert('Centang persetujuan terlebih dahulu'); return; }
+const list = loadSurat(); list.unshift({tgl:new Date().toLocaleString('id-ID'), jenis:'Persetujuan Orang Tua', perihal:Persetujuan oleh ${name}, tipe:'masuk'});
+saveSurat(list);
+document.getElementById('msgPersetujuan').classList.remove('hidden'); document.getElementById('msgPersetujuan').textContent = 'Persetujuan tersimpan lokal. Terima kasih.';
+setTimeout(()=>{closePersetujuan(); document.getElementById('msgPersetujuan').classList.add('hidden')},1500);
+}
+
+// Archive file simulation
+document.getElementById('archFile').addEventListener('change', function(e){
+const f = e.target.files;
+if(!f) return;
+const list = JSON.parse(localStorage.getItem(LS_ARCH)||'[]');
+list.unshift({name:f.name, size:f.size, tgl: new Date().toLocaleString('id-ID')});
+localStorage.setItem(LS_ARCH, JSON.stringify(list));
+renderArchive();
+});
+function renderArchive(){
+const list = JSON.parse(localStorage.getItem(LS_ARCH)||'[]');
+const el = document.getElementById('archList'); el.innerHTML='';
+list.forEach((a,i)=>{ const d = document.createElement('div'); d.className='small muted'; d.style.marginTop='6px'; d.innerHTML = ${i+1}. ${a.name} — ${a.tgl} <button class="link" style="margin-left:8px" onclick="hapusArch(${i})">Hapus</button>; el.appendChild(d); });
+document.getElementById('cntArchive').textContent = list.length;
+} function hapusArch(i){ const list = JSON.parse(localStorage.getItem(LS_ARCH)||'[]'); list.splice(i,1); localStorage.setItem(LS_ARCH, JSON.stringify(list)); renderArchive(); }
+
+// init
+renderSurat(); renderArchive();
+
+// small helper to instruct user about Formspree (replace endpoint)
+(function showFormspreeHint(){
+const hint = document.createElement('div'); hint.className='small muted'; hint.style.marginTop='8px'; hint.innerHTML = 'Catatan: Ganti atribut action form dengan endpoint Formspree milikmu agar email pengajuan terkirim ke TU.'; document.querySelector('#pengajuanForm').appendChild(hint);
+})();
+
+// Optional: pre-fill some info
+(function prefill(){
+// contoh prefills (boleh dihapus)
+document.getElementById('unit').value = 'Administrasi Akademik';
+})();
+</script>
+</body>
+</html>
